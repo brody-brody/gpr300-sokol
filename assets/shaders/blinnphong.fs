@@ -9,11 +9,6 @@ struct Material {
   float shininess;
 };
 
-struct Ambient {
-  float intensity;
-  vec3 color;
-};
-
 struct Light {
   vec3 color;
   vec3 position;
@@ -29,7 +24,6 @@ in vec2 vs_texcoord;
 // uniforms
 uniform sampler2D texture0;
 uniform Material material;
-uniform Ambient ambient;
 uniform Light light;
 uniform vec3 camera_position;
 
@@ -47,6 +41,8 @@ vec3 blinnPhong(vec3 normal, vec3 frag_pos, vec3 light_pos, vec3 light_color) {
   vec3 diffuse = NdotL * material.diffuse;
   vec3 specular = pow(NdotH, material.shininess * 128.0) * material.specular;
 
+  //vec3 lighting = diffuse * material.diffuse + specular * material.specular + material.ambient;
+
   return (diffuse + specular) * light_color;
 }
 
@@ -56,7 +52,7 @@ void main()
   vec3 object_color = (normal * 0.5 + 0.5);
   vec3 light_color = blinnPhong(normal, vs_position, light.position, light.color);
 
-  light_color += ambient.color * material.ambient;
+  vec4 final_color = vec4(object_color * light_color, 1.0) * texture(texture0, vs_texcoord);
 
-  FragColor = vec4(object_color * light_color, 1.0);
+  FragColor = final_color;
 }

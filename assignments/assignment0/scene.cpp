@@ -16,7 +16,7 @@
 glm::mat4 lightMatrix = glm::mat4(1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f);
 
-const glm::vec4 backgroundColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+const glm::vec4 backgroundColor = glm::vec4(0.5f, 0.1f, 0.1f, 1.0f);
 
 struct{
     float alpha = 128.0f;
@@ -55,13 +55,16 @@ void Scene::Render(void)
 {
     const auto view_proj = camera.Projection() * camera.View();
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
     // glDisable(GL_DEPTH_TEST);
+
+    // bind texture to channel
+    glBindTextureUnit(0, texture->getID());
 
     blinnphong->use();
 
