@@ -14,9 +14,9 @@
 #include "batteries/opengl.h"
 
 glm::mat4 lightMatrix = glm::mat4(1.0f);
-glm::vec3 lightColor = glm::vec3(1.0f);
 
-const glm::vec4 backgroundColor = glm::vec4(0.5f, 0.1f, 0.1f, 1.0f);
+
+const glm::vec4 backgroundColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 
 struct{
     float alpha = 128.0f;
@@ -32,10 +32,8 @@ Scene::Scene()
     light = {
         .brightness = 1.0f,
         .color = {1.0f, 1.0f, 1.0f},
-        .position = {2.0f, 2.0f, 2.0f},
+        .position = {0.0f, 2.0f, 0.0f},
     };
-
-    lightColor = light.color;
 }
 
 Scene::~Scene()
@@ -99,14 +97,18 @@ void Scene::Debug(void)
     auto *view = glm::value_ptr(camera.View());
     auto *proj = glm::value_ptr(camera.Projection());
     
-    ImGuizmo::DrawGrid(view, proj, glm::value_ptr(m), 100.0f);
+    //ImGuizmo::DrawGrid(view, proj, glm::value_ptr(m), 100.0f);
+
+    if (ImGuizmo::IsUsing()){
+        light.position = glm::vec3(lightMatrix[3]);
+    }
 
     ImGuizmo::Manipulate(
         view,
         proj,
-        ImGuizmo::ROTATE,
+        ImGuizmo::TRANSLATE,
         ImGuizmo::WORLD,
-        glm::value_ptr(matrix)
+        glm::value_ptr(lightMatrix)
     );
 
     cameracontroller.Debug();
@@ -118,7 +120,7 @@ void Scene::Debug(void)
     ImGui::SliderFloat("Time Factor", &time.factor, 0.0f, 10.0f);
 
     // color settings
-    ImGui::ColorEdit3("Light Color", &lightColor.x);
+    ImGui::ColorEdit3("Light Color", &light.color.x);
 
     // alpha settings
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
