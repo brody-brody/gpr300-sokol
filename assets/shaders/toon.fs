@@ -14,6 +14,11 @@ struct Light {
   vec3 position;
 };
 
+struct Palette {
+  vec3 color1;
+  vec3 color2;
+};
+
 out vec4 FragColor;
 
 // varyings
@@ -23,8 +28,10 @@ in vec2 vs_texcoord;
 
 // uniforms
 uniform sampler2D texture0;
+uniform sampler2D gradientTex;
 uniform Material material;
 uniform Light light;
+uniform Palette pal;
 uniform vec3 camera_position;
 
 vec3 toonShading(vec3 normal, vec3 frag_pos, vec3 light_pos, vec3 light_color) {
@@ -34,14 +41,14 @@ vec3 toonShading(vec3 normal, vec3 frag_pos, vec3 light_pos, vec3 light_color) {
   vec3 halfway_dir = normalize(light_dir + view_dir);
 
   // dot products
-  float NdotL = max(dot(normal, light_dir), 0.0);
-  float NdotH = max(dot(normal, halfway_dir), 0.0);
+  float ndotl = (dot(normal, light_dir) + 1.0 * 0.5);
+  float ndoth = max(dot(normal, halfway_dir), 0.0);
 
-  // components
-  // vec3 diffuse = NdotL * material.diffuse;
-  // vec3 specular = pow(NdotH, material.shininess * 128.0) * material.specular;
+  vec3 gradient = texture(gradientTex, vec2(ndotl, ndotl)).rgb;
 
-  return ((NdotL + NdotH) * light_color);
+  vec3 toonLight_color = mix(pal.color2, pal.color1, gradient);
+
+  return toonLight_color;
 }
 
 void main()

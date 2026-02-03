@@ -18,15 +18,16 @@ glm::mat4 lightMatrix = glm::mat4(1.0f);
 
 const glm::vec4 backgroundColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 
-struct{
+struct {
     float alpha = 128.0f;
 } debug;
 
 Scene::Scene()
 {
-    skull = std::make_unique<ew::Model>("assets/models/skull.obj");
+    suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
     toon = std::make_unique<ew::Shader>("assets/shaders/toon.vs", "assets/shaders/toon.fs");
     texture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
+    gradientTexture = std::make_unique<ew::Texture>("assets/ZAtoon.png");
 
     // defintiiion specific, keep variables in order
     light = {
@@ -34,6 +35,12 @@ Scene::Scene()
         .color = {1.0f, 1.0f, 1.0f},
         .position = {0.0f, 2.0f, 0.0f},
     };
+
+    palette = {
+    .color1 = {1.0f, 0.0f, 1.0f},
+    .color2 = {0.0f, 0.0f, 1.0f},
+    };
+
 }
 
 Scene::~Scene()
@@ -62,12 +69,16 @@ void Scene::Render(void)
     // glDisable(GL_DEPTH_TEST);
 
     // bind texture to channel
-    glBindTextureUnit(0, texture->getID());
+    //glActiveTexture(GL_TEXTURE0 + index);
+    //glBindTextureUnit(0, texture->getID());
+
+    //glActiveTexture(GL_TEXTURE0 + index);
+    glBindTextureUnit(0, gradientTexture->getID());
 
     toon->use();
 
     // sampler for texture
-    toon->setInt("texture0", 0);
+    toon->setInt("gradientTex", 0);
 
     // scene matrices
     toon->setMat4("model", matrix);
@@ -78,12 +89,15 @@ void Scene::Render(void)
     toon->setVec3("light.color", light.color);
     toon->setFloat("material.shininess", debug.alpha);
 
+    toon->setVec3("pal.color1", palette.color1);
+    toon->setVec3("pal.color2", palette.color2);
+
 
     toon->setVec3("material.diffuse", glm::vec3(1));
     toon->setVec3("material.specular", glm::vec3(1));
     toon->setVec3("material.ambient", backgroundColor * 0.1f);
 
-    // draw suzanne
+    // draw da suzanne
     suzanne->draw();
 }
 
@@ -124,6 +138,10 @@ void Scene::Debug(void)
 
     // alpha settings
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
+
+    // palette settings
+    ImGui::ColorEdit3("Color1", &palette.color1[0]);
+    ImGui::ColorEdit3("Color2", &palette.color2[0]);
 
     ImGui::End();
 }
