@@ -25,7 +25,7 @@ Scene::Scene()
 {
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
     toon = std::make_unique<ew::Shader>("assets/shaders/toon.vs", "assets/shaders/toon.fs");
-    mainTexture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
+    mainTexture = std::make_unique<ew::Texture>("assets/textures/mario.png");
     gradientTexture = std::make_unique<ew::Texture>("assets/textures/ZAtoon.png");
 
     // defintiiion specific, keep variables in order
@@ -49,7 +49,17 @@ Scene::Scene()
         glGenTextures(1, &fboTexture);
         glBindTexture(GL_TEXTURE_2D, fboTexture);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("naw dog that aint it");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -88,27 +98,32 @@ void Scene::Render(void)
     glBindTextureUnit(1, gradientTexture->getID());
     toon->setInt("gradientTex", 1);
 
-    toon->use();
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    {
 
-    // scene matrices
-    toon->setMat4("model", matrix);
-    toon->setMat4("view_proj", view_proj);
-    toon->setVec3("camera_position", camera.position);
+        toon->use();
 
-    toon->setVec3("light.position", light.position);
-    toon->setVec3("light.color", light.color);
-    toon->setFloat("material.shininess", debug.alpha);
+        // scene matrices
+        toon->setMat4("model", matrix);
+        toon->setMat4("view_proj", view_proj);
+        toon->setVec3("camera_position", camera.position);
 
-    toon->setVec3("pal.color1", palette.color1);
-    toon->setVec3("pal.color2", palette.color2);
+        toon->setVec3("light.position", light.position);
+        toon->setVec3("light.color", light.color);
+        toon->setFloat("material.shininess", debug.alpha);
+
+        toon->setVec3("pal.color1", palette.color1);
+        toon->setVec3("pal.color2", palette.color2);
 
 
-    toon->setVec3("material.diffuse", glm::vec3(1));
-    toon->setVec3("material.specular", glm::vec3(1));
-    toon->setVec3("material.ambient", backgroundColor * 0.1f);
+        toon->setVec3("material.diffuse", glm::vec3(1));
+        toon->setVec3("material.specular", glm::vec3(1));
+        toon->setVec3("material.ambient", backgroundColor * 0.1f);
 
-    // draw da suzanne
-    suzanne->draw();
+        // draw da suzanne
+        suzanne->draw();
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Scene::Debug(void)
@@ -152,6 +167,12 @@ void Scene::Debug(void)
     // palette settings
     ImGui::ColorEdit3("Color1", &palette.color1[0]);
     ImGui::ColorEdit3("Color2", &palette.color2[0]);
+
+    ImGui::Image(
+        (void*)(intptr_t)fboTexture,
+        ImVec2(400, 300),
+        ImVec2(0, 1), ImVec2(1, 0)
+    );
 
     ImGui::End();
 }
