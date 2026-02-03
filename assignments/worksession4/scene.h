@@ -22,11 +22,14 @@ class Scene final : public batteries::Scene
   private:
     std::unique_ptr<ew::Model> suzanne;
     std::unique_ptr<ew::Shader> toon;
-    std::unique_ptr<ew::Texture> texture;
+    std::unique_ptr<ew::Texture> mainTexture;
     std::unique_ptr<ew::Texture> gradientTexture;
 
     batteries::ambient_t ambient;
     batteries::light_t light;
+
+    unsigned int framebuffer;
+    unsigned int fboTexture;
 
     struct {
       glm::vec3 color1;

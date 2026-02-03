@@ -27,11 +27,13 @@ in vec3 vs_normal;
 in vec2 vs_texcoord;
 
 // uniforms
-uniform sampler2D texture0;
+uniform sampler2D mainTex;
 uniform sampler2D gradientTex;
+
 uniform Material material;
 uniform Light light;
 uniform Palette pal;
+
 uniform vec3 camera_position;
 
 vec3 toonShading(vec3 normal, vec3 frag_pos, vec3 light_pos, vec3 light_color) {
@@ -41,23 +43,24 @@ vec3 toonShading(vec3 normal, vec3 frag_pos, vec3 light_pos, vec3 light_color) {
   vec3 halfway_dir = normalize(light_dir + view_dir);
 
   // dot products
-  float ndotl = (dot(normal, light_dir) + 1.0 * 0.5);
+  float ndotl = dot(normal, light_dir) * 0.5 + 0.5;
   float ndoth = max(dot(normal, halfway_dir), 0.0);
 
-  vec3 gradient = texture(gradientTex, vec2(ndotl, ndotl)).rgb;
+  vec3 gradient = texture(gradientTex, vec2(ndotl, 0.5)).rgb;
 
-  vec3 toonLight_color = mix(pal.color2, pal.color1, gradient);
+  vec3 toonProduct = mix(pal.color2, pal.color1, gradient);
 
-  return toonLight_color;
+  return toonProduct;
 }
 
 void main()
 {
   vec3 normal = normalize(vs_normal);
+  
   vec3 object_color = (normal * 0.5 + 0.5);
   vec3 light_color = toonShading(normal, vs_position, light.position, light.color);
 
-  vec4 final_color = vec4(object_color * light_color, 1.0) * texture(texture0, vs_texcoord);
+  vec4 final_color = vec4(object_color * light_color, 1.0) * texture(mainTex, vs_texcoord);
 
   FragColor = final_color;
 }

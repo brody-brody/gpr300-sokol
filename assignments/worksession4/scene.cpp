@@ -15,7 +15,6 @@
 
 glm::mat4 lightMatrix = glm::mat4(1.0f);
 
-
 const glm::vec4 backgroundColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 
 struct {
@@ -26,8 +25,8 @@ Scene::Scene()
 {
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
     toon = std::make_unique<ew::Shader>("assets/shaders/toon.vs", "assets/shaders/toon.fs");
-    texture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
-    gradientTexture = std::make_unique<ew::Texture>("assets/ZAtoon.png");
+    mainTexture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
+    gradientTexture = std::make_unique<ew::Texture>("assets/textures/ZAtoon.png");
 
     // defintiiion specific, keep variables in order
     light = {
@@ -36,15 +35,30 @@ Scene::Scene()
         .position = {0.0f, 2.0f, 0.0f},
     };
 
+    lightMatrix[3] = glm::vec4(light.position, 1.0f);
+
     palette = {
     .color1 = {1.0f, 0.0f, 1.0f},
     .color2 = {0.0f, 0.0f, 1.0f},
     };
 
+    glCreateFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    {
+        glGenTextures(1, &fboTexture);
+        glBindTexture(GL_TEXTURE_2D, fboTexture);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 Scene::~Scene()
 {
+    glDeleteFramebuffers(1, &framebuffer);
 }
 
 void Scene::Update(float dt)
@@ -69,16 +83,12 @@ void Scene::Render(void)
     // glDisable(GL_DEPTH_TEST);
 
     // bind texture to channel
-    //glActiveTexture(GL_TEXTURE0 + index);
-    //glBindTextureUnit(0, texture->getID());
-
-    //glActiveTexture(GL_TEXTURE0 + index);
-    glBindTextureUnit(0, gradientTexture->getID());
+    glBindTextureUnit(0, mainTexture->getID());
+    toon->setInt("mainTex", 0);
+    glBindTextureUnit(1, gradientTexture->getID());
+    toon->setInt("gradientTex", 1);
 
     toon->use();
-
-    // sampler for texture
-    toon->setInt("gradientTex", 0);
 
     // scene matrices
     toon->setMat4("model", matrix);
