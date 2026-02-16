@@ -25,11 +25,14 @@ class Scene final : public batteries::Scene
     std::unique_ptr<ew::Texture> mainTexture;
     std::unique_ptr<ew::Texture> gradientTexture;
 
+    std::unique_ptr<ew::Shader> postprocess;
+
     batteries::ambient_t ambient;
     batteries::light_t light;
 
     unsigned int framebuffer;
     unsigned int fboTexture;
+    unsigned int fboDepth;
 
     struct {
       glm::vec3 color1;
