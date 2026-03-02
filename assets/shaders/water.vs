@@ -1,4 +1,4 @@
-#version 410 core
+#version 300 es
 
 // attributes
 layout(location = 0) in vec3 in_position;
@@ -9,15 +9,33 @@ layout(location = 2) in vec2 in_texcoord;
 uniform mat4 view_proj;
 uniform mat4 model;
 
+uniform float time;
+
 // varyings
 out vec3 vs_position;
 out vec3 vs_normal;
 out vec2 vs_texcoord;
+
+
+
+float calculateSurface(float x, float z)
+{
+  float y = 0.0;
+
+  y += sin(x *1.0 + time * 0.75);
+  y += sin(z * 0.5 + time * 1.75);
+
+  return y;
+}
 
 void main()
 {
   vs_position = in_position;
   vs_normal = transpose(inverse(mat3(model))) * in_normal;
   vs_texcoord = in_texcoord;
-  gl_Position = view_proj * model * vec4(in_position, 1.0);
+
+  vec3 position = in_position;
+  position.y += calculateSurface(vs_position.x, vs_position.z) * 3.5;
+
+  gl_Position = view_proj * model * vec4(position, 1.0);
 }

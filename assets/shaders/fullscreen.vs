@@ -1,4 +1,4 @@
-#version 300 es
+#version 410 core
 
 // attributes
 layout(location = 0) in vec2 in_position;

@@ -15,5 +15,5 @@ void main()
   vec3 color = texture(screen, vs_texcoord).rgb;
 
   float gray = ((color.r + color.g + color.b) / 3.0);
-  FragColor = vec4(gray, 1.0);
+  FragColor = vec4(gray, gray, gray, 1.0);
 }
