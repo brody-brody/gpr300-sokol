@@ -20,6 +20,9 @@ class Scene final : public batteries::Scene
     void Debug(void);
 
   private:
+    void renderScene(ew::Shader &shader);
+    void initShadowMap();
+
     std::unique_ptr<ew::Model> suzanne;
     std::unique_ptr<ew::Shader> simpleShadow;
     std::unique_ptr<ew::Shader> simpleShadowDepth;
@@ -27,4 +30,14 @@ class Scene final : public batteries::Scene
 
     batteries::ambient_t ambient;
     batteries::light_t light;
+
+    // to see the shadow better
+    unsigned int planeVAO;
+    unsigned int planeVBO;
+    void initPlane();
+
+    // shadow map stuff to write to
+    unsigned int depthMapFBO;
+    unsigned int depthMap;
+    static const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 };
