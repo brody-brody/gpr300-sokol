@@ -25,8 +25,11 @@ struct{
 Scene::Scene()
 {
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
-    blinnphong = std::make_unique<ew::Shader>("assets/shaders/blinnphong.vs", "assets/shaders/blinnphong.fs");
-    texture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
+    
+    simpleShadow = std::make_unique<ew::Shader>("assets/shaders/shadow.vs", "assets/shaders/shadow.fs");
+    simpleShadowDepth = std::make_unique<ew::Shader>("assets/shaders/shadowDepth.vs", "assets/shaders/shadowDepth.fs");
+
+    texture = std::make_unique<ew::Texture>("assets/textures/brick_color.jpg");
 
     // defintiiion specific, keep variables in order
     light = {
